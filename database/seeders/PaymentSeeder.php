@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\PaymentMethod;
 use App\Models\Invoice;
+use App\Models\PaymentMethod;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -111,12 +111,13 @@ class PaymentSeeder extends Seeder
             PaymentMethod::create($method);
         }
 
-        $this->command->info('Created ' . count($paymentMethods) . ' payment methods');
+        $this->command->info('Created '.count($paymentMethods).' payment methods');
 
         // Get users for creating invoices and transactions
         $users = User::take(5)->get();
         if ($users->isEmpty()) {
             $this->command->warn('No users found. Skipping invoice and transaction seeding.');
+
             return;
         }
 
@@ -127,7 +128,7 @@ class PaymentSeeder extends Seeder
         $statuses = ['draft', 'sent', 'paid', 'paid', 'sent'];
         $customerNames = [
             'Sokha Chan', 'Dara Kim', 'Sopheap Ly', 'Chanthy Ros', 'Vanna Pich',
-            'Bopha Sok', 'Rith Chea', 'Srey Mom', 'Kosal Tep', 'Maly Yun'
+            'Bopha Sok', 'Rith Chea', 'Srey Mom', 'Kosal Tep', 'Maly Yun',
         ];
 
         for ($i = 0; $i < 10; $i++) {
@@ -143,10 +144,13 @@ class PaymentSeeder extends Seeder
             $dueDate = (clone $issueDate)->addDays(30);
 
             $invoice = Invoice::create([
+                // Set explicitly because DatabaseSeeder uses WithoutModelEvents,
+                // which suppresses the Invoice::creating hook that auto-fills this.
+                'invoice_number' => 'INV-'.date('Ym').str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT),
                 'user_id' => $user->id,
                 'customer_name' => $customerNames[$i],
-                'customer_email' => strtolower(str_replace(' ', '.', $customerNames[$i])) . '@example.com',
-                'customer_phone' => '+855 ' . rand(10, 99) . ' ' . rand(100, 999) . ' ' . rand(1000, 9999),
+                'customer_email' => strtolower(str_replace(' ', '.', $customerNames[$i])).'@example.com',
+                'customer_phone' => '+855 '.rand(10, 99).' '.rand(100, 999).' '.rand(1000, 9999),
                 'customer_address' => 'Phnom Penh, Cambodia',
                 'subtotal' => $subtotal,
                 'tax_rate' => $taxRate,
@@ -183,6 +187,9 @@ class PaymentSeeder extends Seeder
             $netAmount = $amount - $fee;
 
             Transaction::create([
+                // Set explicitly because DatabaseSeeder uses WithoutModelEvents,
+                // which suppresses the Transaction::creating hook that auto-fills this.
+                'transaction_id' => 'TXN-'.date('Ym').str_pad((string) ($i + 1), 6, '0', STR_PAD_LEFT),
                 'user_id' => $user->id,
                 'invoice_id' => $invoice?->id,
                 'payment_method_id' => $paymentMethod->id,
@@ -193,7 +200,7 @@ class PaymentSeeder extends Seeder
                 'currency' => 'USD',
                 'status' => $status,
                 'description' => $type === 'payment' ? 'Payment for real estate services' : 'Refund for cancelled booking',
-                'ip_address' => '192.168.1.' . rand(1, 255),
+                'ip_address' => '192.168.1.'.rand(1, 255),
                 'processed_at' => $status === 'completed' ? now()->subDays(rand(0, 30)) : null,
             ]);
         }

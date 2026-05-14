@@ -2,13 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Permission;
-use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class CreateUserRolePermissionSeeder extends Seeder
 {
@@ -17,19 +18,17 @@ class CreateUserRolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Disable foreign key checks for seeding
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        // Clear existing data (portable across MySQL/SQLite/PostgreSQL).
+        Schema::disableForeignKeyConstraints();
 
-        // Clear existing data
-        DB::table('permission_user')->truncate();
-        DB::table('role_user')->truncate();
-        DB::table('permission_role')->truncate();
-        User::truncate();
-        Role::truncate();
-        Permission::truncate();
+        DB::table('permission_user')->delete();
+        DB::table('role_user')->delete();
+        DB::table('permission_role')->delete();
+        User::query()->delete();
+        Role::query()->delete();
+        Permission::query()->delete();
 
-        // Re-enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Schema::enableForeignKeyConstraints();
 
         // Create Permissions grouped by functionality
         $permissions = $this->createPermissions();
@@ -256,15 +255,15 @@ class CreateUserRolePermissionSeeder extends Seeder
                 // Add translations for all languages
                 if (in_array(\App\Traits\HasTranslations::class, class_uses_recursive(Permission::class))) {
                     $permission->setTranslation('title', $title, 'en');
-                    $permission->setTranslation('title', $title . ' (ខ្មែរ)', 'km');
-                    $permission->setTranslation('title', $title . ' (中文)', 'zh');
-                    $permission->setTranslation('title', $title . ' (Français)', 'fr');
+                    $permission->setTranslation('title', $title.' (ខ្មែរ)', 'km');
+                    $permission->setTranslation('title', $title.' (中文)', 'zh');
+                    $permission->setTranslation('title', $title.' (Français)', 'fr');
                 }
 
                 // If Permission model uses HasMetaData trait, add meta data
                 if (in_array(\App\Traits\HasMetaData::class, class_uses_recursive(Permission::class))) {
-                    $permission->setMeta('meta_title', $title . ' - Permission', 'en');
-                    $permission->setMeta('meta_description', 'Permission for ' . $title, 'en');
+                    $permission->setMeta('meta_title', $title.' - Permission', 'en');
+                    $permission->setMeta('meta_description', 'Permission for '.$title, 'en');
                 }
 
                 $permissions[$key] = $permission;
@@ -317,14 +316,14 @@ class CreateUserRolePermissionSeeder extends Seeder
             // Add translations for all languages
             if (in_array(\App\Traits\HasTranslations::class, class_uses_recursive(Role::class))) {
                 $role->setTranslation('title', $data['title'], 'en');
-                $role->setTranslation('title', $data['title'] . ' (ខ្មែរ)', 'km');
-                $role->setTranslation('title', $data['title'] . ' (中文)', 'zh');
-                $role->setTranslation('title', $data['title'] . ' (Français)', 'fr');
+                $role->setTranslation('title', $data['title'].' (ខ្មែរ)', 'km');
+                $role->setTranslation('title', $data['title'].' (中文)', 'zh');
+                $role->setTranslation('title', $data['title'].' (Français)', 'fr');
             }
 
             // If Role model uses HasMetaData trait, add meta data
             if (in_array(\App\Traits\HasMetaData::class, class_uses_recursive(Role::class))) {
-                $role->setMeta('meta_title', $data['title'] . ' Role', 'en');
+                $role->setMeta('meta_title', $data['title'].' Role', 'en');
                 $role->setMeta('meta_description', $data['description'], 'en');
             }
 
@@ -346,7 +345,7 @@ class CreateUserRolePermissionSeeder extends Seeder
 
         // Admin - Gets most permissions except system critical ones
         $adminPermissions = collect($permissions)->filter(function ($permission) {
-            return !in_array($permission->title, [
+            return ! in_array($permission->title, [
                 'settings.system',
                 'settings.backup',
                 'permissions.delete',
@@ -357,7 +356,7 @@ class CreateUserRolePermissionSeeder extends Seeder
         // Manager - Gets user, content, and report permissions
         $managerPermissions = collect($permissions)->filter(function ($permission) {
             return in_array($permission->group, ['users', 'content', 'reports']) &&
-                   !str_contains($permission->title, '.delete');
+                   ! str_contains($permission->title, '.delete');
         })->pluck('id')->toArray();
         $roles['manager']->permissions()->attach($managerPermissions);
 
@@ -450,12 +449,12 @@ class CreateUserRolePermissionSeeder extends Seeder
 
         // Create regular users
         for ($i = 1; $i <= 5; $i++) {
-            $users['user_' . $i] = User::create([
+            $users['user_'.$i] = User::create([
                 'first_name' => 'User',
-                'last_name' => 'Number' . $i,
-                'username' => 'user' . $i,
-                'email' => 'user' . $i . '@login.com',
-                'phone_no' => '+123456789' . $i,
+                'last_name' => 'Number'.$i,
+                'username' => 'user'.$i,
+                'email' => 'user'.$i.'@login.com',
+                'phone_no' => '+123456789'.$i,
                 'password' => Hash::make('User@123'),
                 'email_verified_at' => $i <= 3 ? now() : null,
                 'is_verified' => $i <= 3,
@@ -485,7 +484,7 @@ class CreateUserRolePermissionSeeder extends Seeder
 
         // Assign user role to regular users
         for ($i = 1; $i <= 5; $i++) {
-            $users['user_' . $i]->roles()->attach($roles['user']->id);
+            $users['user_'.$i]->roles()->attach($roles['user']->id);
         }
     }
 

@@ -67,12 +67,14 @@ POST /api/register
 Content-Type: application/json
 
 {
-  "name": "John Doe",
+  "first_name": "John",
+  "last_name": "Doe",
   "email": "john@example.com",
   "password": "password123",
   "password_confirmation": "password123"
 }
 ```
+`name` is also accepted and will be split on the first space.
 
 #### Login
 ```http
@@ -80,8 +82,8 @@ POST /api/login
 Content-Type: application/json
 
 {
-  "email": "demo@realestate.com",
-  "password": "password"
+  "email": "admin@login.com",
+  "password": "Admin@123"
 }
 ```
 
@@ -150,11 +152,17 @@ POST /api/inquiries
 
 ## Sample Data
 
-**Demo User:**
-- Email: `demo@realestate.com`
-- Password: `password`
+**Seeded accounts** (created by `CreateUserRolePermissionSeeder`):
 
-10 sample properties seeded with Cambodia real estate listings.
+| Role | Email | Password |
+| --- | --- | --- |
+| Super Admin | `superadmin@login.com` | `SuperAdmin@123` |
+| Admin | `admin@login.com` | `Admin@123` |
+| Manager | `manager@login.com` | `Manager@123` |
+| Editor | `editor@login.com` | `Editor@123` |
+| User 1–5 | `user1@login.com` … `user5@login.com` | `User@123` |
+
+Sample data: 74 properties, 21 projects, 14 news articles, 75 settings.
 
 ## Frontend Integration (Next.js)
 

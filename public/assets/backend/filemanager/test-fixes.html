@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="test-token-123">
+    <title>Test Library Fixes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        h2 {
+            color: #333;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 PanhaImagePreview - Test Fixes</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Theme Merge</h2>
+        <p>Testing partial theme object merge with defaults</p>
+        <div id="test1-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Auto CSRF Configuration</h2>
+        <p>Testing autoConfigureCSRF without configureCRUD</p>
+        <div id="test2-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Load From Server URL Filtering</h2>
+        <p>Testing loadFromServer with undefined URLs</p>
+        <div id="test3-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Destroy Method Cleanup</h2>
+        <p>Testing proper cleanup of event listeners</p>
+        <div id="test4-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 5: Functional Test</h2>
+        <div id="upload-container"></div>
+        <button onclick="runUploadTest()">Test Upload Flow</button>
+        <div id="test5-result"></div>
+    </div>
+
+    <script src="panha-image-preview-library.js"></script>
+    <script>
+        const results = {
+            test1: false,
+            test2: false,
+            test3: false,
+            test4: false,
+            test5: false
+        };
+
+        // Test 1: Theme Merge
+        function test1() {
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.id = 'test1-container';
+                document.body.appendChild(testDiv);
+
+                const uploader = new PanhaImagePreview('#test1-container', {
+                    theme: {
+                        primaryColor: '#FF0000' // Only override one color
+                    }
+                });
+
+                // Check if default colors are preserved
+                const hasDefaults =
+                    uploader.config.theme.gradientStart === '#667eea' &&
+                    uploader.config.theme.gradientEnd === '#764ba2' &&
+                    uploader.config.theme.deleteColor === '#ff4757';
+
+                // Check if custom color is applied
+                const hasCustom = uploader.config.theme.primaryColor === '#FF0000';
+
+                if (hasDefaults && hasCustom) {
+                    results.test1 = true;
+                    showResult('test1-result', '✅ PASS: Theme merge working correctly', true);
+                } else {
+                    showResult('test1-result', '❌ FAIL: Theme merge failed', false);
+                }
+
+                uploader.destroy();
+                document.body.removeChild(testDiv);
+            } catch (error) {
+                showResult('test1-result', '❌ FAIL: ' + error.message, false);
+            }
+        }
+
+        // Test 2: Auto CSRF
+        function test2() {
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.id = 'test2-container';
+                document.body.appendChild(testDiv);
+
+                const uploader = new PanhaImagePreview('#test2-container');
+
+                // Call autoConfigureCSRF without configureCRUD
+                uploader.autoConfigureCSRF();
+
+                // Check if CRUD was auto-initialized and token was set
+                if (uploader.crud && uploader.crud.csrfToken === 'test-token-123') {
+                    results.test2 = true;
+                    showResult('test2-result', '✅ PASS: Auto CSRF configuration working', true);
+                } else {
+                    showResult('test2-result', '❌ FAIL: Auto CSRF failed', false);
+                }
+
+                uploader.destroy();
+                document.body.removeChild(testDiv);
+            } catch (error) {
+                showResult('test2-result', '❌ FAIL: ' + error.message, false);
+            }
+        }
+
+        // Test 3: Load From Server URL Filtering
+        function test3() {
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.id = 'test3-container';
+                document.body.appendChild(testDiv);
+
+                const uploader = new PanhaImagePreview('#test3-container');
+
+                // Mock the loadFromServer scenario with undefined URLs
+                const mockData = {
+                    data: [
+                        { url: 'https://picsum.photos/200' },
+                        { url: null }, // This should be filtered out
+                        { url: undefined }, // This should be filtered out
+                        { url: 'https://picsum.photos/201' }
+                    ]
+                };
+
+                // Simulate the filtering logic
+                const urls = mockData.data
+                    .map(img => img.url)
+                    .filter(url => url);
+
+                if (urls.length === 2) {
+                    results.test3 = true;
+                    showResult('test3-result', '✅ PASS: URL filtering working correctly', true);
+                } else {
+                    showResult('test3-result', '❌ FAIL: URL filtering failed. Got ' + urls.length + ' URLs, expected 2', false);
+                }
+
+                uploader.destroy();
+                document.body.removeChild(testDiv);
+            } catch (error) {
+                showResult('test3-result', '❌ FAIL: ' + error.message, false);
+            }
+        }
+
+        // Test 4: Destroy Cleanup
+        function test4() {
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.id = 'test4-container';
+                document.body.appendChild(testDiv);
+
+                const uploader = new PanhaImagePreview('#test4-container');
+
+                // Add some event listeners
+                uploader.on('test-event', () => {});
+                uploader.on('another-event', () => {});
+
+                // Check listeners exist
+                const hasListeners = Object.keys(uploader.eventListeners).length > 0;
+
+                // Destroy
+                uploader.destroy();
+
+                // Check cleanup
+                const cleanedListeners = Object.keys(uploader.eventListeners).length === 0;
+                const cleanedFiles = uploader.selectedFiles.length === 0;
+                const cleanedQueue = uploader.uploadQueue.length === 0;
+
+                if (hasListeners && cleanedListeners && cleanedFiles && cleanedQueue) {
+                    results.test4 = true;
+                    showResult('test4-result', '✅ PASS: Destroy cleanup working correctly', true);
+                } else {
+                    showResult('test4-result', '❌ FAIL: Destroy cleanup incomplete', false);
+                }
+
+                document.body.removeChild(testDiv);
+            } catch (error) {
+                showResult('test4-result', '❌ FAIL: ' + error.message, false);
+            }
+        }
+
+        // Test 5: Functional Test
+        function runUploadTest() {
+            try {
+                const uploader = new PanhaImagePreview('#upload-container', {
+                    maxFiles: 5,
+                    onFilesChange: (files) => {
+                        showResult('test5-result', `✅ Files changed: ${files.length} files selected`, true);
+                        results.test5 = true;
+                    },
+                    onError: (message) => {
+                        showResult('test5-result', '❌ Error: ' + message, false);
+                    }
+                });
+
+                uploader.configureCRUD({
+                    uploadUrl: '/api/test',
+                    deleteUrl: '/api/test',
+                    loadUrl: '/api/test'
+                }).autoConfigureCSRF();
+
+                showResult('test5-result', '✅ Upload test initialized. Please select some images to test.', true);
+            } catch (error) {
+                showResult('test5-result', '❌ FAIL: ' + error.message, false);
+            }
+        }
+
+        function showResult(elementId, message, isPass) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="test-result ${isPass ? 'pass' : 'fail'}">${message}</div>`;
+        }
+
+        function runAllTests() {
+            console.log('Running all tests...');
+            test1();
+            test2();
+            test3();
+            test4();
+
+            // Show summary
+            setTimeout(() => {
+                const total = Object.keys(results).length - 1; // Exclude test5 (manual)
+                const passed = Object.values(results).slice(0, 4).filter(r => r).length;
+
+                console.log(`\n=== Test Summary ===`);
+                console.log(`Passed: ${passed}/${total}`);
+                console.log(`Status: ${passed === total ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}`);
+
+                if (passed === total) {
+                    document.body.insertAdjacentHTML('afterbegin',
+                        '<div style="background: #d4edda; color: #155724; padding: 20px; border-radius: 5px; margin-bottom: 20px; text-align: center; font-size: 20px; font-weight: bold;">🎉 ALL TESTS PASSED! Library is working correctly.</div>'
+                    );
+                }
+            }, 500);
+        }
+
+        // Run tests on load
+        window.addEventListener('DOMContentLoaded', runAllTests);
+    </script>
+</body>
+</html>

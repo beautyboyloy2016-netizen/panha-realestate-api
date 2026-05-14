@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="demo-csrf-token-12345">
+    <title>PanhaImagePreview - CRUD Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff3838;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .info-panel {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info-panel h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .event-log {
+            background: #2d3748;
+            color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .event-log-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .event-log-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-time {
+            color: #9ca3af;
+            margin-right: 10px;
+        }
+
+        .event-success {
+            color: #10b981;
+        }
+
+        .event-error {
+            color: #ef4444;
+        }
+
+        .event-info {
+            color: #3b82f6;
+        }
+
+        .code-example {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .code-example h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .code-example pre {
+            background: #2d3748;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ PanhaImagePreview - CRUD Demo</h1>
+        <p class="subtitle">
+            Demonstrating built-in CRUD operations with Laravel-style API
+        </p>
+
+        <!-- Upload Container -->
+        <div id="upload-container"></div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" id="uploadBtn">
+                📤 Upload to Server
+            </button>
+            <button class="btn btn-secondary" id="loadBtn">
+                📥 Load from Server
+            </button>
+            <button class="btn btn-secondary" id="clearBtn">
+                🗑️ Clear All
+            </button>
+            <button class="btn btn-danger" id="clearLogBtn">
+                Clear Event Log
+            </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <h3>📊 Library Status</h3>
+            <div class="info-item">
+                <span class="info-label">Selected Files:</span>
+                <span class="info-value" id="fileCount">0</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Total Size:</span>
+                <span class="info-value" id="totalSize">0 Bytes</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Max Files:</span>
+                <span class="info-value" id="maxFiles">8</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">CRUD Configured:</span>
+                <span class="info-value" id="crudStatus">✅ Yes</span>
+            </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="info-panel">
+            <h3>📝 Event Log</h3>
+            <div class="event-log" id="eventLog">
+                <div class="event-log-item event-info">
+                    <span class="event-time">[00:00:00]</span>
+                    <span>Waiting for events...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Example -->
+        <div class="code-example">
+            <h4>💡 How This Demo Works</h4>
+            <pre>// Initialize uploader
+const uploader = new PanhaImagePreview('#upload-container', {
+  maxFiles: 8,
+  maxSize: 5 * 1024 * 1024
+});
+
+// Configure CRUD (connects to Laravel-style API)
+uploader.configureCRUD({
+  uploadUrl: '/api/images',      // Simulated endpoint
+  deleteUrl: '/api/images',      // Simulated endpoint
+  loadUrl: '/api/images',        // Simulated endpoint
+  fieldName: 'images[]'
+}).autoConfigureCSRF();
+
+// Listen to events
+uploader.on('ServerUploadSuccess', (data) => {
+  console.log('Upload success:', data.response);
+});
+
+// Upload to server
+await uploader.uploadToServer({
+  onProgress: (percent) => {
+    console.log(`${percent}% complete`);
+  }
+});</pre>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <strong>Note:</strong> This demo simulates server responses. In production, configure real API endpoints.
+        </div>
+    </div>
+
+    <!-- Include the library -->
+    <script src="panha-image-preview-library.js"></script>
+
+    <script>
+        // Initialize uploader
+        const uploader = new PanhaImagePreview('#upload-container', {
+            maxFiles: 8,
+            maxSize: 5 * 1024 * 1024,
+            onFilesChange: (files) => {
+                updateInfo();
+                logEvent('FilesChanged', `${files.length} files selected`, 'info');
+            },
+            onError: (message) => {
+                logEvent('Error', message, 'error');
+                alert(message);
+            }
+        });
+
+        // Configure CRUD - Simulated endpoints for demo
+        uploader.configureCRUD({
+            uploadUrl: '/api/images',
+            deleteUrl: '/api/images',
+            loadUrl: '/api/images',
+            fieldName: 'images[]',
+            additionalData: {
+                demo: true
+            }
+        }).autoConfigureCSRF();
+
+        // Event listeners
+        uploader.on('CRUDConfigured', (data) => {
+            logEvent('CRUDConfigured', 'CRUD operations configured', 'success');
+        });
+
+        uploader.on('BeforeServerUpload', (data) => {
+            logEvent('BeforeServerUpload', `Uploading ${data.files.length} files...`, 'info');
+        });
+
+        uploader.on('ServerUploadSuccess', (data) => {
+            logEvent('ServerUploadSuccess', 'Files uploaded successfully', 'success');
+            updateInfo();
+        });
+
+        uploader.on('ServerUploadError', (data) => {
+            logEvent('ServerUploadError', data.error.message, 'error');
+        });
+
+        uploader.on('ServerLoadSuccess', (data) => {
+            logEvent('ServerLoadSuccess', 'Images loaded from server', 'success');
+            updateInfo();
+        });
+
+        // Button handlers
+        document.getElementById('uploadBtn').addEventListener('click', async () => {
+            if (uploader.isEmpty()) {
+                alert('Please select at least one image');
+                return;
+            }
+
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            try {
+                uploadBtn.disabled = true;
+                progressContainer.style.display = 'block';
+
+                // Simulate upload since we don't have real backend
+                const response = await simulateUpload(uploader, (percent) => {
+                    progressFill.style.width = percent + '%';
+                    progressFill.textContent = Math.round(percent) + '%';
+                });
+
+                logEvent('Upload', 'Upload completed successfully!', 'success');
+                alert('Images uploaded successfully!');
+
+                // Clear after successful upload
+                uploader.clearFiles();
+
+            } catch (error) {
+                logEvent('Upload', 'Upload failed: ' + error.message, 'error');
+                alert('Upload failed: ' + error.message);
+            } finally {
+                uploadBtn.disabled = false;
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressFill.style.width = '0%';
+                    progressFill.textContent = '0%';
+                }, 1000);
+            }
+        });
+
+        document.getElementById('loadBtn').addEventListener('click', async () => {
+            try {
+                // Simulate loading images from server
+                const simulatedImages = [
+                    'https://picsum.photos/400/400?random=1',
+                    'https://picsum.photos/400/400?random=2',
+                    'https://picsum.photos/400/400?random=3'
+                ];
+
+                await uploader.loadExistingImages(simulatedImages);
+                logEvent('Load', 'Loaded 3 sample images', 'success');
+
+            } catch (error) {
+                logEvent('Load', 'Failed to load images: ' + error.message, 'error');
+                alert('Failed to load images: ' + error.message);
+            }
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            uploader.clearFiles();
+            logEvent('Clear', 'All files cleared', 'info');
+            updateInfo();
+        });
+
+        document.getElementById('clearLogBtn').addEventListener('click', () => {
+            document.getElementById('eventLog').innerHTML = '<div class="event-log-item event-info"><span class="event-time">[' + getCurrentTime() + ']</span><span>Event log cleared</span></div>';
+        });
+
+        // Update info panel
+        function updateInfo() {
+            document.getElementById('fileCount').textContent = uploader.getFileCount();
+            document.getElementById('totalSize').textContent = uploader.getTotalSizeFormatted();
+            document.getElementById('maxFiles').textContent = uploader.getOption('maxFiles');
+        }
+
+        // Log events
+        function logEvent(event, message, type = 'info') {
+            const eventLog = document.getElementById('eventLog');
+            const eventClass = type === 'success' ? 'event-success' : (type === 'error' ? 'event-error' : 'event-info');
+
+            const logItem = document.createElement('div');
+            logItem.className = 'event-log-item ' + eventClass;
+            logItem.innerHTML = `<span class="event-time">[${getCurrentTime()}]</span><span><strong>${event}:</strong> ${message}</span>`;
+
+            eventLog.insertBefore(logItem, eventLog.firstChild);
+
+            // Keep only last 20 events
+            while (eventLog.children.length > 20) {
+                eventLog.removeChild(eventLog.lastChild);
+            }
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        // Simulate upload with progress
+        function simulateUpload(uploader, onProgress) {
+            return new Promise((resolve, reject) => {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    onProgress(progress);
+
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        // Simulate server response
+                        resolve({
+                            success: true,
+                            message: 'Files uploaded successfully',
+                            data: uploader.getFiles().map((file, index) => ({
+                                id: Date.now() + index,
+                                name: file.name,
+                                size: file.size,
+                                url: URL.createObjectURL(file)
+                            }))
+                        });
+                    }
+                }, 200);
+            });
+        }
+
+        // Initial update
+        updateInfo();
+    </script>
+</body>
+</html>

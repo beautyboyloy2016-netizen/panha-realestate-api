@@ -1,0 +1,697 @@
+/**
+ * Tech-Select Styles
+ * Version: 1.1.0
+ * Bootstrap 4 & 5 Modal Compatible
+ * Includes comprehensive modal support without requiring style overrides
+ */
+
+/* Container */
+.tech-select-container {
+    box-sizing: border-box;
+    display: inline-block;
+    margin: 0;
+    position: relative;
+    vertical-align: middle;
+}
+
+.tech-select-container * {
+    box-sizing: border-box;
+}
+
+/* Selection */
+.tech-select-selection {
+    background-color: #fff;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block;
+    min-height: 32px;
+    padding: 4px 8px;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.tech-select-selection:hover {
+    border-color: #888;
+}
+
+.tech-select-container--open .tech-select-selection {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    outline: none;
+}
+
+.tech-select-selection__rendered {
+    color: #000000;
+    /* line-height: 24px; */
+    padding-right: 30px;
+    overflow: hidden;
+}
+
+/* Multiple select - flex layout for choices and search */
+.tech-select-container--multiple .tech-select-selection__rendered {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    padding-right: 12px;
+    min-height: auto;
+}
+
+.tech-select-selection__placeholder {
+    color: #999;
+    line-height: 24px;
+}
+
+/* Single select */
+.tech-select-selection__rendered__text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Multiple select choices */
+.tech-select-selection__choice {
+    background-color: #0d6efd;
+    border: 1px solid #353ef5;
+    border-radius: 3px;
+    cursor: default;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    color: #ffffff;
+    line-height: 1.5;
+}
+
+.tech-select-selection__choice__remove {
+    color: #ff0000;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: bold;
+    margin-right: 4px;
+}
+
+.tech-select-selection__choice__remove:hover {
+    color: #ff6600;
+}
+
+.tech-select-selection__choice__text {
+    display: inline-block;
+    color: #ffffff;
+}
+
+/* Clear button */
+.tech-select-selection__clear {
+    color: #f60f0f;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+}
+
+.tech-select-selection__clear:hover {
+    color: #f86a04;
+}
+
+/* Arrow */
+.tech-select-selection__arrow {
+    border-color: #888 transparent transparent transparent;
+    border-style: solid;
+    border-width: 5px 4px 0 4px;
+    height: 0;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+}
+
+.tech-select-container--open .tech-select-selection__arrow {
+    border-color: transparent transparent #888 transparent;
+    border-width: 0 4px 5px 4px;
+}
+
+/* Dropdown */
+.tech-select-dropdown {
+    background-color: #fff;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    display: none !important;
+    left: 0;
+    margin-top: 4px;
+    position: absolute;
+    width: 100%;
+    z-index: 1060;
+    max-height: 300px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tech-select-container--open .tech-select-dropdown {
+    display: block !important;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Dropdown for multiple select - attached below selection */
+.tech-select-dropdown--below {
+    margin-top: 0;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tech-select-container--multiple.tech-select-container--open .tech-select-selection {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Search - removed dropdown search box, now using inline only */
+
+/* Inline search for multiple select */
+.tech-select-search__field--inline {
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    width: 0;
+    flex: 0 0 auto;
+    background: transparent;
+    font-size: 13px;
+    line-height: 1.5;
+    height: 0;
+    vertical-align: middle;
+    opacity: 0;
+}
+
+/* Show search input when typing or focused */
+.tech-select-search__field--inline:focus,
+.tech-select-search__field--inline:not(:placeholder-shown) {
+    min-width: 120px;
+    width: auto;
+    flex: 1 1 auto;
+    height: auto;
+    opacity: 1;
+}
+
+.tech-select-search__field--inline:focus {
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+/* Hidden search for single select (shown on click) */
+.tech-select-search__field--hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Multiple select placeholder */
+.tech-select-container--multiple .tech-select-selection__placeholder {
+    position: static;
+    pointer-events: none;
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+}
+
+/* Single select - show search on top when active */
+.tech-select-container:not(.tech-select-container--multiple) .tech-select-search__field--inline:not(.tech-select-search__field--hidden) {
+    position: absolute;
+    left: 12px;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    height: auto;
+    padding: 6px 8px;
+    opacity: 1;
+    pointer-events: all;
+    background: #fff;
+    z-index: 1;
+}
+
+/* Results */
+.tech-select-results {
+    display: block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.tech-select-results__option {
+    padding: 8px 12px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    color: #000000;
+}
+
+.tech-select-results__option:hover {
+    background-color: #007bff;
+}
+
+.tech-select-results__option--selected {
+    background-color: #007bff;
+    color: #f8f9fa;
+}
+
+.tech-select-results__option--selected:hover {
+    background-color: #0570e3;
+}
+
+.tech-select-results__option--disabled {
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.tech-select-results__option--no-results {
+    color: #999;
+    cursor: default;
+    text-align: center;
+}
+
+/* Scrollbar styling */
+.tech-select-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tech-select-results::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.tech-select-results::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.tech-select-results::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Dark theme */
+.tech-select-theme-dark .tech-select-selection {
+    background-color: #2c3e50;
+    border-color: #34495e;
+    color: #ecf0f1;
+}
+
+.tech-select-theme-dark .tech-select-selection:hover {
+    border-color: #4a5f7f;
+}
+
+.tech-select-theme-dark .tech-select-selection__rendered {
+    color: #ecf0f1;
+}
+
+.tech-select-theme-dark .tech-select-dropdown {
+    background-color: #2c3e50;
+    border-color: #34495e;
+}
+
+.tech-select-theme-dark .tech-select-search__field {
+    background-color: #34495e;
+    border-color: #4a5f7f;
+    color: #ecf0f1;
+}
+
+.tech-select-theme-dark .tech-select-results__option {
+    color: #ecf0f1;
+}
+
+.tech-select-theme-dark .tech-select-results__option:hover {
+    background-color: #34495e;
+}
+
+.tech-select-theme-dark .tech-select-results__option--selected {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.tech-select-theme-dark .tech-select-selection__choice {
+    background-color: #34495e;
+    border-color: #4a5f7f;
+    color: #ecf0f1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tech-select-dropdown {
+        max-height: 200px;
+    }
+
+    .tech-select-results {
+        max-height: 150px;
+    }
+}
+
+/* Smooth transitions */
+.tech-select-selection {
+    transition: all 0.2s ease;
+}
+
+.tech-select-selection__choice {
+    transition: all 0.15s ease;
+}
+
+.tech-select-results__option {
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Focus states for accessibility */
+.tech-select-selection:focus,
+.tech-select-container--open .tech-select-selection {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+.tech-select-results__option:focus {
+    background-color: #e8f4f8;
+    outline: 2px solid #4a90e2;
+    outline-offset: -2px;
+}
+
+/* ============================================
+   Bootstrap Modal Compatibility
+   ============================================ */
+
+/* Ensure dropdown appears above modal backdrop
+   Bootstrap 4 & 5 modal z-index hierarchy:
+   - modal-backdrop: 1040 (BS4) / 1050 (BS5)
+   - modal: 1050 (BS4) / 1055 (BS5)
+   - tech-select-dropdown: 1060 (above both)
+*/
+.modal .tech-select-dropdown {
+    z-index: 1060 !important;
+}
+
+/* Ensure the select wrapper has proper z-index */
+.modal .tech-select-wrapper {
+    z-index: 1060 !important;
+}
+
+/* Make sure the container is positioned correctly */
+.modal .tech-select-container {
+    z-index: 1060 !important;
+}
+
+/* Override modal overflow to prevent clipping dropdowns */
+.modal-body {
+    overflow: visible !important;
+}
+
+.modal-content {
+    overflow: visible !important;
+}
+
+/* Critical: Ensure modal itself doesn't clip */
+.modal {
+    overflow: visible !important;
+}
+
+/* Bootstrap modal-dialog variants support */
+.modal-dialog .tech-select-dropdown,
+.modal-dialog-scrollable .tech-select-dropdown,
+.modal-dialog-centered .tech-select-dropdown {
+    z-index: 1060 !important;
+}
+
+/* Fix overflow for modal-dialog wrapper */
+.modal-dialog {
+    overflow: visible !important;
+}
+
+.modal-dialog-scrollable {
+    overflow: visible !important;
+}
+
+.modal-dialog-scrollable .modal-body {
+    overflow: visible !important;
+}
+
+.modal-dialog-scrollable .modal-content {
+    overflow: visible !important;
+}
+
+.modal-dialog-centered {
+    overflow: visible !important;
+}
+
+/* Support for nested modals (both BS4 & BS5) */
+.modal.show .tech-select-dropdown,
+.modal.fade.show .tech-select-dropdown {
+    z-index: 1060 !important;
+}
+
+/* Nested modal support - ensure second modal's dropdown is even higher */
+.modal:nth-of-type(2) .tech-select-dropdown {
+    z-index: 1070 !important;
+}
+
+/* Fullscreen modal support (Bootstrap 5) */
+.modal-fullscreen .tech-select-dropdown {
+    z-index: 1060 !important;
+}
+
+/* Static backdrop modal support */
+.modal-static .tech-select-dropdown {
+    z-index: 1060 !important;
+}
+
+/* Form controls in modals - ensure proper width */
+.modal .tech-select-container {
+    width: 100%;
+}
+
+.modal .form-control.tech-select-selection,
+.modal .form-select.tech-select-selection {
+    width: 100%;
+}
+
+/* Ensure dropdown positioning is correct in all modal sizes */
+.modal-sm .tech-select-dropdown,
+.modal-lg .tech-select-dropdown,
+.modal-xl .tech-select-dropdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 100%;
+}
+
+/* Fix overflow for large modals specifically */
+.modal-lg .modal-body,
+.modal-xl .modal-body {
+    overflow: visible !important;
+}
+
+.modal-lg .modal-content,
+.modal-xl .modal-content {
+    overflow: visible !important;
+}
+
+/* Ensure large modal dialogs don't clip dropdowns */
+.modal-dialog-lg,
+.modal-dialog-xl {
+    overflow: visible;
+}
+
+/* Fix for modal fade animation interference */
+.modal.fade .tech-select-container {
+    transform: none !important;
+}
+
+/* Critical fix for Bootstrap 5 modal transform creating stacking context */
+.modal.show .modal-dialog {
+    transform: none !important;
+}
+
+.modal.fade.show .modal-dialog {
+    transform: none !important;
+}
+
+/* Ensure dropdown stays with absolute positioning but above everything */
+.modal .tech-select-dropdown {
+    position: absolute !important;
+    z-index: 9999 !important;
+}
+
+/* Ensure container creates proper stacking context */
+.modal .tech-select-container {
+    position: relative !important;
+    z-index: auto;
+}
+
+.modal .tech-select-container.tech-select-container--open {
+    z-index: 9999 !important;
+}
+
+/* Ensure dropdowns work in modal footers and headers too */
+.modal-header .tech-select-dropdown,
+.modal-footer .tech-select-dropdown {
+    z-index: 1060 !important;
+}
+
+/* Fix positioning in RTL modals */
+.modal[dir="rtl"] .tech-select-dropdown {
+    right: 0;
+    left: auto;
+}
+
+/* ============================================
+   Bootstrap Form Integration
+   ============================================ */
+
+/* Match Bootstrap form control styling */
+.form-control+.tech-select-container,
+.form-select+.tech-select-container {
+    margin-top: 0;
+}
+
+/* Bootstrap input group support */
+.input-group .tech-select-container {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+}
+
+.input-group .tech-select-selection {
+    border-radius: 0;
+}
+
+.input-group> :not(:first-child) .tech-select-selection {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.input-group> :not(:last-child) .tech-select-selection {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Bootstrap validation states */
+.was-validated .tech-select-container .tech-select-selection:invalid,
+.tech-select-container .tech-select-selection.is-invalid {
+    border-color: #dc3545;
+}
+
+.was-validated .tech-select-container .tech-select-selection:valid,
+.tech-select-container .tech-select-selection.is-valid {
+    border-color: #28a745;
+}
+
+/* Validation feedback positioning */
+.tech-select-container~.invalid-feedback,
+.tech-select-container~.valid-feedback {
+    display: block;
+}
+
+/* Bootstrap disabled state */
+.tech-select-container .tech-select-selection:disabled,
+.tech-select-container .tech-select-selection[disabled] {
+    background-color: #e9ecef;
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   Additional Modal Edge Cases
+   ============================================ */
+
+/* Fix for scrollable modal bodies */
+.modal-body.overflow-auto .tech-select-dropdown,
+.modal-body.overflow-scroll .tech-select-dropdown {
+    position: fixed !important;
+}
+
+/* Ensure dropdown appears correctly in grid layouts within modals */
+.modal .row .tech-select-dropdown,
+.modal .col .tech-select-dropdown,
+.modal [class*="col-"] .tech-select-dropdown {
+    z-index: 9999 !important;
+}
+
+/* Fix for card components in modals */
+.modal .card .tech-select-dropdown {
+    z-index: 9999 !important;
+}
+
+/* Accordion in modals */
+.modal .accordion .tech-select-dropdown {
+    z-index: 9999 !important;
+}
+
+/* Tab content in modals */
+.modal .tab-content .tech-select-dropdown,
+.modal .tab-pane .tech-select-dropdown {
+    z-index: 9999 !important;
+}
+
+/* NOTE: Position and stacking context rules are now handled above in modal compatibility section */
+
+/* ============================================
+   Form-Specific Modal Fixes
+   ============================================ */
+
+/* Ensure forms in large modals don't clip dropdowns */
+.modal-lg form,
+.modal-xl form {
+    overflow: visible !important;
+}
+
+/* Fix for multiple selects in same form */
+.modal form .tech-select-container {
+    position: relative !important;
+    z-index: auto;
+}
+
+.modal form .tech-select-container.tech-select-container--open {
+    z-index: 9999 !important;
+}
+
+/* Ensure row layouts in forms work correctly */
+.modal .row {
+    overflow: visible !important;
+}
+
+.modal [class*="col-"] {
+    overflow: visible !important;
+}
+
+/* Fix for mb-3 (margin-bottom) spacing with dropdowns */
+.modal .mb-3 {
+    overflow: visible !important;
+}
+
+/* Specific fix for dynamic content forms */
+.modal form .mb-3 .tech-select-container {
+    overflow: visible !important;
+}
+
+/* Ensure disabled selects don't cause layout issues */
+.modal select:disabled+.tech-select-container {
+    pointer-events: none;
+    opacity: 0.65;
+}

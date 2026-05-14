@@ -16,13 +16,26 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required_without:name|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'name' => 'required_without:first_name|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        // Accept either {first_name, last_name} or a combined {name}; split on first space.
+        if (! empty($validated['first_name'] ?? null)) {
+            $firstName = $validated['first_name'];
+            $lastName = $validated['last_name'] ?? '';
+        } else {
+            $parts = preg_split('/\s+/', trim($validated['name']), 2);
+            $firstName = $parts[0] ?? '';
+            $lastName = $parts[1] ?? '';
+        }
+
         $user = User::create([
-            'name' => $validated['name'],
+            'first_name' => $firstName,
+            'last_name' => $lastName,
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
@@ -49,7 +62,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -73,7 +86,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Logout successful'
+            'message' => 'Logout successful',
         ]);
     }
 

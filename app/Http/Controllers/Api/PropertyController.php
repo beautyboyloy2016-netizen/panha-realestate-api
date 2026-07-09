@@ -74,7 +74,7 @@ class PropertyController extends Controller
 
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
+        $sortOrder = strtolower((string) $request->get('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
 
         $allowedSorts = ['price', 'area', 'bedrooms', 'created_at', 'views'];
         if (in_array($sortBy, $allowedSorts)) {
@@ -82,7 +82,7 @@ class PropertyController extends Controller
         }
 
         // Pagination
-        $perPage = $request->get('per_page', 15);
+        $perPage = min(max((int) $request->get('per_page', 15), 1), 50);
         $properties = $query->paginate($perPage);
 
         return response()->json($properties);
@@ -115,8 +115,8 @@ class PropertyController extends Controller
             'gallery_ids.*' => 'integer|exists:media,id',
         ]);
 
-        // Get authenticated user
-        $validated['user_id'] = Auth::id() ?? 1;
+        // Get authenticated user (never fall back to a hardcoded ID)
+        $validated['user_id'] = $request->user()->id;
 
         $property = Property::create($validated);
 
@@ -227,7 +227,7 @@ class PropertyController extends Controller
     {
         $query = Property::with(['entityMedia.media'])->forSale()->available();
 
-        $perPage = $request->get('per_page', 15);
+        $perPage = min(max((int) $request->get('per_page', 15), 1), 50);
         $properties = $query->paginate($perPage);
 
         return response()->json($properties);
@@ -240,7 +240,7 @@ class PropertyController extends Controller
     {
         $query = Property::with(['entityMedia.media'])->forRent()->available();
 
-        $perPage = $request->get('per_page', 15);
+        $perPage = min(max((int) $request->get('per_page', 15), 1), 50);
         $properties = $query->paginate($perPage);
 
         return response()->json($properties);

@@ -34,8 +34,8 @@
                 <label for="groupFilter">{{ __('admin.permissions.filter_group') }}</label>
                 <select class="form-control" id="groupFilter">
                   <option value="">{{ __('admin.permissions.all_groups') }}</option>
-                  @if(isset($groups))
-                    @foreach($groups as $group)
+                  @if (isset($groups))
+                    @foreach ($groups as $group)
                       <option value="{{ $group }}">{{ ucwords(str_replace('_', ' ', $group)) }}</option>
                     @endforeach
                   @endif
@@ -156,7 +156,8 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="createTitle">Permission Title <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="createTitle" name="title" required placeholder="e.g., user_create">
+                <input type="text" class="form-control" id="createTitle" name="title" required
+                  placeholder="e.g., user_create">
                 <div class="invalid-feedback"></div>
                 <small class="form-text text-muted">Use snake_case format (e.g., user_create, product_edit)</small>
               </div>
@@ -164,7 +165,8 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="createGroup">Permission Group</label>
-                <input type="text" class="form-control" id="createGroup" name="group" placeholder="e.g., user_management">
+                <input type="text" class="form-control" id="createGroup" name="group"
+                  placeholder="e.g., user_management">
                 <div class="invalid-feedback"></div>
                 <small class="form-text text-muted">Groups help organize related permissions</small>
               </div>
@@ -358,7 +360,8 @@
         $('.invalid-feedback').text('');
 
         const formData = new FormData($('#createPermissionForm')[0]);
-        const url = isEdit ? '{{ route('admin.permissions.update', ':id') }}'.replace(':id', $('#permissionId').val()) :
+        const url = isEdit ? '{{ route('admin.permissions.update', ':id') }}'.replace(':id', $('#permissionId')
+            .val()) :
           '{{ route('admin.permissions.store') }}';
         const method = 'POST';
 

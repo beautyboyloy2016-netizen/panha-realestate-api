@@ -33,8 +33,8 @@ class InquiryController extends Controller
             'message' => 'required|string',
         ]);
 
-        // Optional: associate with authenticated user
-        $validated['user_id'] = null; // Can be auth()->id() if user is logged in
+        // Associate with the authenticated user when a token is present (null for guests)
+        $validated['user_id'] = auth('sanctum')->id();
 
         $inquiry = Inquiry::create($validated);
 

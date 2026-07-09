@@ -11,9 +11,9 @@ use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\LookupController;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Public auth routes (rate-limited to slow brute force / mass registration)
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 // Settings API (Public)
 Route::get('/settings', [SettingController::class, 'index']);
@@ -29,7 +29,7 @@ Route::prefix('lookups')->group(function () {
 });
 
 // Social Authentication routes for API clients
-Route::prefix('auth')->group(function () {
+Route::prefix('auth')->middleware('throttle:10,1')->group(function () {
     Route::get('/google', [SocialAuthController::class, 'getGoogleAuthUrl']);
     Route::get('/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
     Route::post('/telegram', [SocialAuthController::class, 'handleTelegramAuth']);
@@ -59,39 +59,42 @@ Route::get('/news/latest', [NewsArticleController::class, 'latest']);
 Route::get('/news/categories', [NewsArticleController::class, 'categories']);
 Route::get('/news/{article}', [NewsArticleController::class, 'show']);
 
-// Public inquiry submission
-Route::post('/inquiries', [InquiryController::class, 'store']);
+// Public inquiry submission (rate-limited to slow spam)
+Route::post('/inquiries', [InquiryController::class, 'store'])->middleware('throttle:10,1');
 
-// Protected routes
+// Authenticated routes (any logged-in user)
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
-    // Property management (authenticated users)
+    // Favorites (scoped to the current user inside the controller)
+    Route::get('/favorites', [FavoriteController::class, 'index']);
+    Route::post('/favorites', [FavoriteController::class, 'store']);
+    Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
+});
+
+// Admin-only content management
+// Requires the 'admin' middleware alias — see README-SECURITY-FIXES.md
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    // Property management
     Route::post('/properties', [PropertyController::class, 'store']);
     Route::put('/properties/{property}', [PropertyController::class, 'update']);
     Route::delete('/properties/{property}', [PropertyController::class, 'destroy']);
 
-    // Project management (authenticated users)
+    // Project management
     Route::post('/projects', [ProjectController::class, 'store']);
     Route::put('/projects/{project}', [ProjectController::class, 'update']);
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
 
-    // News management (authenticated users)
+    // News management
     Route::post('/news', [NewsArticleController::class, 'store']);
     Route::put('/news/{article}', [NewsArticleController::class, 'update']);
     Route::delete('/news/{article}', [NewsArticleController::class, 'destroy']);
 
-    // Favorites
-    Route::get('/favorites', [FavoriteController::class, 'index']);
-    Route::post('/favorites', [FavoriteController::class, 'store']);
-    Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy']);
-
-    // Inquiry management (for property owners/admins)
+    // Inquiry management (leads contain customer names/emails/phones)
     Route::get('/inquiries', [InquiryController::class, 'index']);
     Route::get('/inquiries/{inquiry}', [InquiryController::class, 'show']);
     Route::put('/inquiries/{inquiry}', [InquiryController::class, 'update']);
     Route::delete('/inquiries/{inquiry}', [InquiryController::class, 'destroy']);
 });
-

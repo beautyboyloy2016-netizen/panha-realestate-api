@@ -56,7 +56,7 @@ class ProjectController extends Controller
 
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
+        $sortOrder = strtolower((string) $request->get('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
 
         $allowedSorts = ['name', 'price_from', 'units', 'rental_yield', 'created_at'];
         if (in_array($sortBy, $allowedSorts)) {
@@ -64,7 +64,7 @@ class ProjectController extends Controller
         }
 
         // Pagination
-        $perPage = $request->get('per_page', 15);
+        $perPage = min(max((int) $request->get('per_page', 15), 1), 50);
         $projects = $query->paginate($perPage);
 
         return response()->json($projects);
